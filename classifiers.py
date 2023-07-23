@@ -149,6 +149,22 @@ def get_imagenet_mobilenet():
     return model
 
 
+def get_imagenet_64_vgg16():
+    conv_base = tf.keras.applications.VGG16(weights='imagenet', include_top=False, input_shape=(64,64, 3))
+
+    model = Sequential()
+
+    model.add(conv_base)
+    model.add(Flatten(name='flatten'))
+
+    # model.add(Dense(10, activation="softmax"))
+    model.add(Dense(10, activation=None))
+
+    model.load_weights('./networks/imagenet/imagenet_64_vgg16_weights.h5')
+
+    return model
+
+
 
 
 

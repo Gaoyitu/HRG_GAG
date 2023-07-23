@@ -339,5 +339,102 @@ def get_imagenet_generator_HRG():
 
 
 
+
+def get_imagenet_generator_GAG():
+    inputs = Input(shape=(64,64,3))
+
+    x = Conv2D(filters=128, kernel_size=(5, 5), strides=(2, 2), padding='same',
+               activation=None, kernel_initializer='glorot_uniform', use_bias=False)(inputs)
+    x = BatchNormalization()(x)
+    x = LeakyReLU(alpha=0.2)(x)
+
+
+    x = Conv2D(filters=256, kernel_size=(5, 5), strides=(2, 2), padding='same',
+               activation=None, kernel_initializer='glorot_uniform', use_bias=False)(x)
+    x = BatchNormalization()(x)
+    x = LeakyReLU(alpha=0.2)(x)
+
+
+    x = Conv2D(filters=512, kernel_size=(5, 5), strides=(2, 2), padding='same',
+               activation=None, kernel_initializer='glorot_uniform', use_bias=False)(x)
+    x = BatchNormalization()(x)
+    x = LeakyReLU(alpha=0.2)(x)
+
+    x = Conv2D(filters=1024, kernel_size=(5, 5), strides=(2, 2), padding='same',
+               activation=None, kernel_initializer='glorot_uniform', use_bias=False)(x)
+    x = BatchNormalization()(x)
+    x = LeakyReLU(alpha=0.2)(x)
+
+
+    x = GaussianNoise(0.01)(x)
+
+
+    x = Conv2DTranspose(filters=1024, kernel_size=(5, 5), strides=(2, 2), padding='same',
+                        activation=None, kernel_initializer='glorot_uniform', use_bias=False)(x)
+    x = BatchNormalization()(x)
+    x = ReLU()(x)
+
+    x = Conv2DTranspose(filters=512, kernel_size=(5, 5), strides=(2, 2), padding='same',
+                        activation=None, kernel_initializer='glorot_uniform', use_bias=False)(x)
+    x = BatchNormalization()(x)
+    x = ReLU()(x)
+
+
+    x = Conv2DTranspose(filters=256, kernel_size=(5, 5), strides=(2, 2), padding='same',
+                        activation=None, kernel_initializer='glorot_uniform', use_bias=False)(x)
+    x = BatchNormalization()(x)
+    x = ReLU()(x)
+
+
+    x = Conv2DTranspose(filters=128, kernel_size=(5, 5), strides=(2, 2), padding='same',
+                        activation=None, kernel_initializer='glorot_uniform', use_bias=False)(x)
+    x = BatchNormalization()(x)
+    x = ReLU()(x)
+
+
+    x = Conv2D(3, (5, 5), (1, 1), padding='same',
+               activation='tanh', kernel_initializer='glorot_uniform')(x)
+
+    autoencoder = Model(inputs=inputs, outputs=x)
+    return autoencoder
+
+
+def get_imagenet_discriminator():
+    inputs = Input(shape=(64, 64, 3))
+
+    x = Conv2D(filters=128, kernel_size=(5, 5), strides=(2, 2), padding='same',
+               activation=None, kernel_initializer='glorot_uniform', use_bias=True)(inputs)
+    x = LeakyReLU(alpha=0.2)(x)
+    x = Dropout(0.5)(x)
+
+    x = Conv2D(256, (5, 5), (2, 2), padding='same',
+               activation=None, kernel_initializer='glorot_uniform', use_bias=True)(x)
+    x = BatchNormalization()(x)
+    x = LeakyReLU(alpha=0.2)(x)
+    x = Dropout(0.5)(x)
+
+    x = Conv2D(512, (5, 5), (2, 2), padding='same',
+               activation=None, kernel_initializer='glorot_uniform', use_bias=True)(x)
+    x = BatchNormalization()(x)
+    x = LeakyReLU(alpha=0.2)(x)
+    x = Dropout(0.5)(x)
+
+
+    x = Conv2D(1024, (5, 5), (2, 2), padding='same',
+               activation=None, kernel_initializer='glorot_uniform', use_bias=True)(x)
+    x = BatchNormalization()(x)
+    x = LeakyReLU(alpha=0.2)(x)
+    x = Dropout(0.5)(x)
+
+    x = Flatten()(x)
+
+    S_out = Dense(1, activation='sigmoid', kernel_initializer='glorot_uniform', use_bias=False)(x)
+    C_out = Dense(10, activation='softmax', kernel_initializer='glorot_uniform', use_bias=False)(x)
+
+    model = Model(inputs=inputs, outputs=[S_out, C_out])
+
+    return model
+
+
 if __name__ == '__main__':
     get_mnist_generator_HRG().summary()
